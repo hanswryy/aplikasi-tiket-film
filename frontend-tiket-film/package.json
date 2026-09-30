@@ -11,6 +11,8 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@primeuix/themes": "^3.0.1",
+    "primevue": "^5.0.2",
     "vue": "^3.5.42"
   },
   "devDependencies": {
