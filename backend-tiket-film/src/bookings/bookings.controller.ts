@@ -39,6 +39,8 @@ export class BookingsController {
   }
 
   @Post(':id/pay')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.USER)
   pay(@GetUser('userId') userId: string, @Param('id') bookingId: string) {
     return this.bookingsService.processPayment(userId, bookingId);
   }
