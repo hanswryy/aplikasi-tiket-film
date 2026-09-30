@@ -1,4 +1,4 @@
-import { PrismaClient, Role, SeatStatus, BookingStatus } from '@prisma/client';
+import { PrismaClient, Role, BookingStatus } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PrismaPg } from '@prisma/adapter-pg';
 
@@ -8,141 +8,173 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-    await prisma.seat.deleteMany();
-    await prisma.booking.deleteMany();
-    await prisma.user.deleteMany();
-    await prisma.movie.deleteMany();
-    await prisma.showtime.deleteMany();
+  console.log('Cleaning existing database records...');
+  // Menghapus data berurutan sesuai relasi Foreign Key
+  await prisma.bookedSeat.deleteMany();
+  await prisma.booking.deleteMany();
+  await prisma.showtime.deleteMany();
+  await prisma.studio.deleteMany();
+  await prisma.movie.deleteMany();
+  await prisma.user.deleteMany();
 
-    const hashedPassword = await bcrypt.hash('password123', 10);
+  console.log('Seeding users');
+  const hashedPassword = await bcrypt.hash('password123', 10);
 
-    await prisma.user.create({
-        data: {
-            email: 'admin@cinema.com',
-            name: 'Admin Cinema',
-            password: hashedPassword,
-            role: Role.ADMIN,
-        }
-    });
+  await prisma.user.create({
+    data: {
+      email: 'admin@cinema.com',
+      name: 'Admin XXI',
+      password: hashedPassword,
+      role: Role.ADMIN,
+    },
+  });
 
-    const customerUser = await prisma.user.create({
-        data: {
-            email: 'john@example.com',
-            name: 'John Doe',
-            password: hashedPassword,
-            role: Role.USER,
-        }
-    });
+  const customerUser = await prisma.user.create({
+    data: {
+      email: 'john@example.com',
+      name: 'John Doe',
+      password: hashedPassword,
+      role: Role.USER,
+    },
+  });
 
-    console.log('Seeded users:', await prisma.user.findMany());
+  console.log('Seeding studios');
+  const studio1 = await prisma.studio.create({
+    data: {
+      name: 'Studio 1 XXI',
+      capacity: 100,
+      totalRows: 10,
+      totalCols: 10,
+    },
+  });
 
-    const movies = await Promise.all([
-        prisma.movie.create({
-        data: {
-            title: 'Dune: Part Two',
-            description: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.',
-            posterUrl: 'https://image.tmdb.org/t/p/w500/1pdfLPoA6S3M329R2IOFm3B429L.jpg',
-            durationMin: 166,
-        },
-        }),
-        prisma.movie.create({
-        data: {
-            title: 'Spider-Man: Across the Spider-Verse',
-            description: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its existence.',
-            posterUrl: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj7sMFF.jpg',
-            durationMin: 140,
-        },
-        }),
-        prisma.movie.create({
-        data: {
-            title: 'Oppenheimer',
-            description: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.',
-            posterUrl: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv3zR1n2ua.jpg',
-            durationMin: 180,
-        },
-        }),
-    ]);
+  const studio2 = await prisma.studio.create({
+    data: {
+      name: 'Studio 2 XXI',
+      capacity: 100,
+      totalRows: 10,
+      totalCols: 10,
+    },
+  });
 
-    console.log('Seeded movies:', movies);
+  const studioImax = await prisma.studio.create({
+    data: {
+      name: 'IMAX 3D',
+      capacity: 120,
+      totalRows: 10,
+      totalCols: 12,
+    },
+  });
 
-    const rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']; // 10 Rows
-    const seatPrice = 50000;
-    const now = new Date();
-    const createdShowtimes = [];
+  console.log('Seeding movies');
+  const movie1 = await prisma.movie.create({
+    data: {
+      title: 'Dune: Part Two',
+      description: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.',
+      durationMin: 166,
+      posterUrl: 'https://image.tmdb.org/t/p/w500/1pdfLPoA6S3M329R2IOFm3B429L.jpg',
+    },
+  });
 
-    for (const movie of movies) {
-        // Create 2 showtimes for each movie
-        const st1 = await prisma.showtime.create({
-            data: {
-                movieId: movie.id,
-                price: seatPrice,
-                startTime: new Date(now.getTime() + 3 * 60 * 60 * 1000), // Today +3 hrs
-            },
-        });
-        createdShowtimes.push(st1);
+  const movie2 = await prisma.movie.create({
+    data: {
+      title: 'Spider-Man: Across the Spider-Verse',
+      description: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its existence.',
+      durationMin: 140,
+      posterUrl: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj7sMFF.jpg',
+    },
+  });
 
-        const st2 = await prisma.showtime.create({
-            data: {
-                movieId: movie.id,
-                price: seatPrice,
-                startTime: new Date(now.getTime() + 27 * 60 * 60 * 1000), // Tomorrow +3 hrs
-            },
-        });
-        createdShowtimes.push(st2);
-    }
+  const movie3 = await prisma.movie.create({
+    data: {
+      title: 'Oppenheimer',
+      description: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.',
+      durationMin: 180,
+      posterUrl: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv3zR1n2ua.jpg',
+    },
+  });
 
-    // Populate 100 seats (10 rows x 10 numbers) for every showtime
-    for (const showtime of createdShowtimes) {
-        const seatsToCreate = [];
-        for (const row of rows) {
-        for (let number = 1; number <= 10; number++) {
-            seatsToCreate.push({
-            showtimeId: showtime.id,
-            row,
-            number,
-            status: SeatStatus.AVAILABLE,
-            });
-        }
-        }
-        await prisma.seat.createMany({ data: seatsToCreate });
-    }
+  console.log('Seeding showtimes');
+  const now = new Date();
 
-    const sampleShowtime = createdShowtimes[0];
+  // Showtime 1: Dune di Studio 1 (Hari ini + 3 jam)
+  const startTime1 = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  const endTime1 = new Date(startTime1.getTime() + movie1.durationMin * 60 * 1000);
 
-    const sampleSeats = await prisma.seat.findMany({
-        where: {
-            showtimeId: sampleShowtime.id,
-            row: 'A',
-            number: { in: [1, 2] },
-        },
-    });
+  const showtime1 = await prisma.showtime.create({
+    data: {
+      movieId: movie1.id,
+      studioId: studio1.id,
+      price: 50000,
+      startTime: startTime1,
+      endTime: endTime1,
+    },
+  });
 
-    const sampleBooking = await prisma.booking.create({
-        data: {
-            userId: customerUser.id,
-            showtimeId: sampleShowtime.id,
-            totalAmount: seatPrice * 2,
-            status: BookingStatus.PAID,
-        },
-    });
+  // Showtime 2: Spider-Man di IMAX (Besok)
+  const startTime2 = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const endTime2 = new Date(startTime2.getTime() + movie2.durationMin * 60 * 1000);
 
-    // Link selected seats to the booking and update status to BOOKED
-    await prisma.seat.updateMany({
-        where: {
-            id: { in: sampleSeats.map((s) => s.id) },
-        },
-        data: {
-            status: SeatStatus.BOOKED,
-            bookingId: sampleBooking.id,
-        },
-    });
+  await prisma.showtime.create({
+    data: {
+      movieId: movie2.id,
+      studioId: studioImax.id,
+      price: 75000,
+      startTime: startTime2,
+      endTime: endTime2,
+    },
+  });
+
+  // Showtime 3: Oppenheimer di Studio 2 (Hari ini + 2 jam)
+  const startTime3 = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+  const endTime3 = new Date(startTime3.getTime() + movie3.durationMin * 60 * 1000);
+
+  await prisma.showtime.create({
+    data: {
+      movieId: movie3.id,
+      studioId: studio2.id,
+      price: 50000,
+      startTime: startTime3,
+      endTime: endTime3,
+    },
+  });
+
+  console.log('Seeding sample booking & booked seats');
+  const sampleBooking = await prisma.booking.create({
+    data: {
+      userId: customerUser.id,
+      showtimeId: showtime1.id,
+      totalAmount: 50000 * 2,
+      status: BookingStatus.PAID,
+    },
+  });
+
+  // Insert kursi yang di-book (A1 dan A2)
+  await prisma.bookedSeat.createMany({
+    data: [
+      {
+        showtimeId: showtime1.id,
+        bookingId: sampleBooking.id,
+        row: 'A',
+        number: 1,
+      },
+      {
+        showtimeId: showtime1.id,
+        bookingId: sampleBooking.id,
+        row: 'A',
+        number: 2,
+      },
+    ],
+  });
+  
+  console.log('Database seeding completed successfully!');
 }
 
 main()
-    .catch((e) => {
-        console.error('Error during seeding:', e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+  .catch((e) => {
+    console.error('Error seeding database:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
