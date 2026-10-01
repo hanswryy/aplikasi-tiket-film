@@ -52,7 +52,10 @@ const fetchBookingDetail = async () => {
 };
 
 const handlePay = async () => {
-  if (!bookingId) return;
+  if (!bookingId || !window.snap) {
+    errorMessage.value = 'Payment gateway belum siap.';
+    return;
+  }
 
   try {
     isPaying.value = true;
@@ -61,12 +64,27 @@ const handlePay = async () => {
     const response = await api.post(`/bookings/${bookingId}/pay`);
     const data = response.data.data || response.data;
 
-    alert('Pembayaran berhasil!');
+    window.snap.pay(data.token, {
+      onSuccess: () => {
+        router.push('/my-bookings');
+      },
 
-    router.push('/my-bookings');
+      onPending: () => {
+        router.push('/my-bookings');
+      },
+
+      onError: () => {
+        errorMessage.value = 'Pembayaran gagal. Silakan coba lagi.';
+      },
+
+      onClose: () => {
+        errorMessage.value = 'Pembayaran belum selesai.';
+      },
+    });
   } catch (err: any) {
     errorMessage.value =
-      err.response?.data?.message || 'Gagal memproses pembayaran. Silakan coba lagi.';
+      err.response?.data?.message ||
+      'Gagal membuat transaksi pembayaran.';
   } finally {
     isPaying.value = false;
   }

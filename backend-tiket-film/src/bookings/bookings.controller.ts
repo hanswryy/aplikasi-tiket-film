@@ -17,7 +17,6 @@ import { Role } from '@prisma/client';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 
 @Controller('bookings')
-@UseGuards(AuthGuard('jwt'))
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
 
@@ -43,5 +42,10 @@ export class BookingsController {
   @Roles(Role.USER)
   pay(@GetUser('userId') userId: string, @Param('id') bookingId: string) {
     return this.bookingsService.processPayment(userId, bookingId);
+  }
+
+  @Post('midtrans/notification')
+  notifyMidtrans(@Body() payload: Record<string, unknown>) {
+    return this.bookingsService.handleMidtransNotification(payload);
   }
 }
