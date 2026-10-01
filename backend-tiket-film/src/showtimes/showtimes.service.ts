@@ -13,22 +13,16 @@ export class ShowtimesService {
 
   findAll() {
     // also get total number of available seats for each showtime
-
     return this.prisma.showtime.findMany({
       include: {
         movie: true,
         studio: true,
-        tickets: {
-          where: {
-            status: 'AVAILABLE',
-          },
-        },
       },
     });
   }
 
-  findOne(id: string) {
-    const showtime = this.prisma.showtime.findUnique({
+  async findOne(id: string) {
+    const showtime = await this.prisma.showtime.findUnique({
       where: { id },
       include: {
         movie: true,
@@ -38,7 +32,19 @@ export class ShowtimesService {
     if (!showtime) {
       throw new Error('Showtime not found');
     }
-    return showtime;
+    // also get all bookedseats for this showtime
+    const bookedSeats = await this.prisma.booking.findMany({
+      where: { showtimeId: id },
+      select: {
+        bookedSeats: true,
+      },
+    });
+
+    return {
+      ...showtime,
+      bookedSeats: bookedSeats.flatMap((booking) => booking.bookedSeats),
+    };
+    
   }
 
   update(id: string, updateShowtimeDto: UpdateShowtimeDto) {

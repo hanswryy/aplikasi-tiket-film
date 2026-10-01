@@ -24,8 +24,6 @@ export class ShowtimesController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.ADMIN)
   findOne(@Param('id') id: string) {
     return this.showtimesService.findOne(id);
   }

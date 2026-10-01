@@ -13,12 +13,26 @@ export class MoviesService {
     });
   }
 
-  findAll() {
-    return this.prisma.movie.findMany();
+  findAll(search?: string) {
+    const normalizedSearch = search?.trim();
+
+    return this.prisma.movie.findMany({
+      where: normalizedSearch
+        ? {
+            title: {
+              contains: normalizedSearch,
+              mode: 'insensitive',
+            },
+          }
+        : undefined,
+      orderBy: {
+        title: 'asc',
+      },
+    });
   }
 
-  findOne(id: string) {
-    const movie = this.prisma.movie.findUnique({
+  async findOne(id: string) {
+    const movie = await this.prisma.movie.findUnique({
       where: { id },
     });
 
@@ -26,7 +40,18 @@ export class MoviesService {
       throw new Error(`Movie with ID ${id} not found`);
     }
 
-    return movie;
+    // also return its showtimes data
+    const showtimes = await this.prisma.showtime.findMany({
+      where: { movieId: id },
+      include: {
+        studio: true,
+      },
+    });
+
+    return {
+      ...movie,
+      showtimes,
+    };
   }
 
   async update(id: string, updateMovieDto: UpdateMovieDto) {
