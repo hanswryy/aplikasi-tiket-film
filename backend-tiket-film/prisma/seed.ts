@@ -72,7 +72,7 @@ async function main() {
       title: 'Dune: Part Two',
       description: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.',
       durationMin: 166,
-      posterUrl: 'https://image.tmdb.org/t/p/w500/1pdfLPoA6S3M329R2IOFm3B429L.jpg',
+      posterUrl: 'https://media.themoviedb.org/t/p/w220_and_h330_face/heM4XKC0jA8fTSNe8F7oUkcJV7Z.jpg',
     },
   });
 
@@ -81,7 +81,7 @@ async function main() {
       title: 'Spider-Man: Across the Spider-Verse',
       description: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its existence.',
       durationMin: 140,
-      posterUrl: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj7sMFF.jpg',
+      posterUrl: 'https://media.themoviedb.org/t/p/w220_and_h330_face/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg',
     },
   });
 
@@ -90,7 +90,7 @@ async function main() {
       title: 'Oppenheimer',
       description: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.',
       durationMin: 180,
-      posterUrl: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv3zR1n2ua.jpg',
+      posterUrl: 'https://media.themoviedb.org/t/p/w220_and_h330_face/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg',
     },
   });
 
